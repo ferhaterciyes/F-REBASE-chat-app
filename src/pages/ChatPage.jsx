@@ -2,15 +2,24 @@ import {
   addDoc,
   collection,
   onSnapshot,
+  orderBy,
+  query,
   serverTimestamp,
+  where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 import { useEffect, useState } from "react";
+import Message from "../components/Message";
 
 const ChatPage = ({ room, setRoom }) => {
+  const [messages, setMessages] = useState(null);
   //kolleksişyonun ref alma
   const messagesCol = collection(db, "messages");
-  const [messages, setMessages] = useState(null)
+  // filtrekeme ayarları oluşturma
+  const queryOptions = query(messagesCol,
+     where("room", "==", room),
+     orderBy("createdAt", "asc")
+     );
 
   // mesajı veritabanına kaydetme
   const handleSubmit = async (e) => {
@@ -30,20 +39,21 @@ const ChatPage = ({ room, setRoom }) => {
       },
       createdAt: serverTimestamp(),
     });
+    e.target.reset()
   };
-
+  // verilere aone ol
   useEffect(() => {
-    // anlık olarak kolleksiyondaki değişimleri izler 
+    // anlık olarak kolleksiyondaki değişimleri izler
     //kolleksiyon her değiştiğinde verdiğimiz fonksiyonları çalıştırır
 
-   const unsub = onSnapshot(messagesCol, (snapshot) => {
-      const tempMsg= [];
-         // docs tamamını dönüp tempmsh isimli diziye aktardık
-      snapshot.docs.forEach((doc) =>tempMsg.push(doc.data()));
+    const unsub = onSnapshot(queryOptions, (snapshot) => {
+      const tempMsg = [];
+      // docs tamamını dönüp tempmsh isimli diziye aktardık
+      snapshot.docs.forEach((doc) => tempMsg.push(doc.data()));
       // geçici dizideki verileri alıp state e aktardım
       setMessages(tempMsg);
-      
-      return ()=>unsub()
+
+      return () => unsub();
     });
   }, []);
 
@@ -54,7 +64,11 @@ const ChatPage = ({ room, setRoom }) => {
         <p>{room}</p>
         <button onClick={() => setRoom(null)}>Farklı Oda</button>
       </header>
-      <main></main>
+      <main className="">
+        {messages?.map((data, i) => (
+          <Message data={data} key={i} />
+        ))}
+      </main>
       <form onSubmit={handleSubmit}>
         <input type="text" required placeholder="mesajınızı yazın . . . " />
         <button type="submit">Gönder</button>
