@@ -14,7 +14,7 @@ Bu proje, React kullanılarak geliştirilmiş bir web uygulamasıdır. Firebase 
 
 ## Ekran Görüntüleri
 
-![Ekran Görüntüsü 1](ekranGifi.gif)
+![Proje Gif](ekrangifi.gif)
 *proje ekran gifi*
 
 ## Canlı Demo
